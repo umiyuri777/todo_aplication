@@ -25,11 +25,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends HookConsumerWidget {
-  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context, WidgetRef ref){
-    final _text = useState<String>('');
+    final todo = useState<List<String>>([]);
+    final TextEditingController _controller = useTextEditingController();
+    
     return Scaffold(
       appBar: AppBar(title: const Text('Todoリスト'),
       backgroundColor: Colors.blue,),
@@ -48,11 +49,21 @@ class MyHomePage extends HookConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              _text.value = _controller.value.text;
+              todo.value = [
+                ...todo.value,
+                _controller.value.text
+              ];
+              // todo.value.add(_controller.value.text);
             }, 
             child: const Text('追加')
           ),
-          Text(_text.value)
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: todo.value.length,
+            itemBuilder: (context, index){
+              return Text('${todo.value[index]}');
+            }
+          )
         ],
       ),
     );
