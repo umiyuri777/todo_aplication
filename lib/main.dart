@@ -53,7 +53,6 @@ class MyHomePage extends HookConsumerWidget {
                 ...todo.value,
                 _controller.value.text
               ];
-              // todo.value.add(_controller.value.text);
             }, 
             child: const Text('追加')
           ),
@@ -61,7 +60,11 @@ class MyHomePage extends HookConsumerWidget {
             shrinkWrap: true,
             itemCount: todo.value.length,
             itemBuilder: (context, index){
-              return Text('${todo.value[index]}');
+              return Card(
+                child: ListTile(
+                  title: Text('${todo.value[index]}')
+                )
+              );
             }
           )
         ],
@@ -69,4 +72,24 @@ class MyHomePage extends HookConsumerWidget {
     );
   }
 }
+
+final todolistProvider = StateNotifierProvider<TodoListNotifier, List<String>>((ref) => TodoListNotifier(),);
+
+class TodoListNotifier extends StateNotifier<List<String>>{
+  TodoListNotifier() : super([]);
+
+  void add(String todo){
+    state = [...state, todo];
+  }
+
+  void remove(String todo){
+    state = [
+      for(final item in state)
+        if(item != todo) item,
+    ];
+  }
+
+}
+
+
 
