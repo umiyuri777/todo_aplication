@@ -32,19 +32,26 @@ class MyHomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref){
-    final todo = useState<List<String>>([]);
+    // final todo = useState<List<String>>([]);
     final TextEditingController _controller = useTextEditingController();
     final todolist = ref.watch(todolistProvider);
+    final tabController = useTabController(initialLength: 2);
     
     return Scaffold(
-      appBar: AppBar(title: const Text('Todoリスト'),
-      backgroundColor: Colors.blue,),
+      appBar: AppBar(
+        title: const Text('Todoリスト'),
+        backgroundColor: Colors.blue,
+        //tabbarを設定
+        bottom: TabBar(
+          controller: tabController,
+          tabs: const [
+            Tab(text: "未完了",),
+            Tab(text: "完了済",)
+          ],  
+        ),
+      ),
       body: Column(
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Text('helloworld!!!!')),
-          
           TextField(
             controller: _controller,
             decoration: InputDecoration(
@@ -62,9 +69,17 @@ class MyHomePage extends HookConsumerWidget {
             shrinkWrap: true,
             itemCount: todolist.length,
             itemBuilder: (context, index){
+              // final item = todolist[index];
               return Card(
                 child: ListTile(
-                  title: Text('${todolist[index]}')
+                  title: Text('${todolist[index]}'),
+                  trailing: IconButton(
+                    onPressed: () {
+                      ref.read(todolistProvider.notifier).remove(todolist[index]);
+                    },
+                    icon: Icon(Icons.delete)
+                  ),
+
                 )
               );
             }
