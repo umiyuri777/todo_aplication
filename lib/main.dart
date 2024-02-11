@@ -5,7 +5,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: const MyApp()
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -30,6 +34,7 @@ class MyHomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref){
     final todo = useState<List<String>>([]);
     final TextEditingController _controller = useTextEditingController();
+    final todolist = ref.watch(todolistProvider);
     
     return Scaffold(
       appBar: AppBar(title: const Text('Todoリスト'),
@@ -49,20 +54,17 @@ class MyHomePage extends HookConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              todo.value = [
-                ...todo.value,
-                _controller.value.text
-              ];
+              ref.read(todolistProvider.notifier).add(_controller.value.text);
             }, 
             child: const Text('追加')
           ),
           ListView.builder(
             shrinkWrap: true,
-            itemCount: todo.value.length,
+            itemCount: todolist.length,
             itemBuilder: (context, index){
               return Card(
                 child: ListTile(
-                  title: Text('${todo.value[index]}')
+                  title: Text('${todolist[index]}')
                 )
               );
             }
@@ -88,7 +90,6 @@ class TodoListNotifier extends StateNotifier<List<String>>{
         if(item != todo) item,
     ];
   }
-
 }
 
 
