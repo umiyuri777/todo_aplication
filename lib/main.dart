@@ -52,8 +52,11 @@ class MyHomePage extends HookConsumerWidget {
       ),
       body: Column(
         children: [
-          TextField(
+          TextFormField(
             controller: _controller,
+            onFieldSubmitted:(value) {
+              ref.read(todolistProvider.notifier).add(_controller.value.text);
+            },
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'タスクを入力してください',
