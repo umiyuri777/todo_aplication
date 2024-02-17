@@ -33,7 +33,7 @@ class MyHomePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref){
     // final todo = useState<List<String>>([]);
-    final TextEditingController _controller = useTextEditingController();
+    // final TextEditingController _controller = useTextEditingController();
     final todolist = ref.watch(todolistProvider);
     final tabController = useTabController(initialLength: 2);
     
@@ -50,29 +50,42 @@ class MyHomePage extends HookConsumerWidget {
           ],  
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewNoteCreate()),
+          ).then((value) {
+            ref.read(todolistProvider.notifier).add(value);
+          });
+        },
+        child: const Icon(Icons.add)  //追加ボタン
+      ),
       body: Column(
         children: [
-          TextFormField(
-            controller: _controller,
-            onFieldSubmitted:(value) {
-              ref.read(todolistProvider.notifier).add(_controller.value.text);
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: 'タスクを入力してください',
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(todolistProvider.notifier).add(_controller.value.text);
-            }, 
-            child: const Text('追加')
-          ),
+          // TextFormField(
+          //   controller: _controller,
+          //   keyboardType: TextInputType.multiline,
+          //   maxLines: null,
+          //
+          //   onFieldSubmitted:(value) {
+          //     ref.read(todolistProvider.notifier).add(_controller.value.text);
+          //   },
+          //   decoration: InputDecoration(
+          //     border: InputBorder.none,
+          //     hintText: 'タスクを入力してください',
+          //   ),
+          // ),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     ref.read(todolistProvider.notifier).add(_controller.value.text);
+          //   }, 
+          //   child: const Text('追加')
+          // ),
           ListView.builder(
             shrinkWrap: true,
             itemCount: todolist.length,
             itemBuilder: (context, index){
-              // final item = todolist[index];
               return Card(
                 child: ListTile(
                   title: Text('${todolist[index]}'),
@@ -82,13 +95,43 @@ class MyHomePage extends HookConsumerWidget {
                     },
                     icon: Icon(Icons.delete)
                   ),
-
                 )
               );
             }
           )
         ],
       ),
+    );
+  }
+}
+
+class NewNoteCreate extends HookConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final TextEditingController _controller = useTextEditingController();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('新しいメモ'),
+      ),
+      body: Column(
+        children: <Widget>[
+          TextField(
+            controller: _controller,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            decoration: const InputDecoration(
+              labelText: 'メモ',
+              hintText: '新しいメモを入力してください',
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, _controller.text);
+            },
+            child: const Text('追加'),
+          ),
+        ],
+      )
     );
   }
 }
@@ -109,6 +152,4 @@ class TodoListNotifier extends StateNotifier<List<String>>{
     ];
   }
 }
-
-
 
