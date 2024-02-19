@@ -88,6 +88,9 @@ Widget incompleted_buildListView(todolist, WidgetRef ref){
           trailing: IconButton(
             onPressed: () {
               ref.read(todolistProvider.notifier).taskComplete(todolist[index]);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('完了済みに移動しました'))
+              );
             },
             icon: const Icon(Icons.check_outlined)
           ),
@@ -111,6 +114,9 @@ Widget completed_buildListView(todolist, WidgetRef ref){
           trailing: IconButton(
             onPressed: () {
               ref.read(todolistProvider.notifier).remove(completetask[index]);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('削除しました'))
+              );
             },
             icon: const Icon(Icons.delete)
           ),
