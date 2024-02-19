@@ -34,10 +34,7 @@ class MyHomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref){
-    // final todo = useState<List<String>>([]);
-    // final TextEditingController _controller = useTextEditingController();
     final todolist = ref.watch(todolistProvider);
-    // final tabController = useTabController(initialLength: 2);
     
     return MaterialApp(
       home: DefaultTabController(
@@ -67,12 +64,8 @@ class MyHomePage extends HookConsumerWidget {
           ),
           body: TabBarView(
             children: [
-              _buildListView(todolist, ref),
-              const Center(
-                child: Text(
-                'mikanのタスク', 
-                style: TextStyle(fontSize: 20))
-              ),
+              incompleted_buildListView(todolist, ref),
+              completed_buildListView(todolist, ref)
             ]
           )
         ),
@@ -81,17 +74,43 @@ class MyHomePage extends HookConsumerWidget {
   }
 }
 
-Widget _buildListView(todolist, WidgetRef ref){
+Widget incompleted_buildListView(todolist, WidgetRef ref){
+
+  final incompletedtask = ref.watch(todolistProvider.notifier).incompletedtask;
+
   return  ListView.builder(
     shrinkWrap: true,
-    itemCount: todolist.length,
+    itemCount: incompletedtask.length,
     itemBuilder: (context, index){
       return Card(
         child: ListTile(
-          title: Text(todolist[index]),
+          title: Text(incompletedtask[index].decoration),
           trailing: IconButton(
             onPressed: () {
-              ref.read(todolistProvider.notifier).remove(todolist[index]);
+              ref.read(todolistProvider.notifier).taskComplete(todolist[index]);
+            },
+            icon: const Icon(Icons.check_outlined)
+          ),
+        )
+      );
+    }
+  );
+}
+
+Widget completed_buildListView(todolist, WidgetRef ref){
+
+  final completetask = ref.watch(todolistProvider.notifier).completetask;
+
+  return  ListView.builder(
+    shrinkWrap: true,
+    itemCount: completetask.length,
+    itemBuilder: (context, index){
+      return Card(
+        child: ListTile(
+          title: Text(completetask[index].decoration),
+          trailing: IconButton(
+            onPressed: () {
+              ref.read(todolistProvider.notifier).remove(completetask[index]);
             },
             icon: const Icon(Icons.delete)
           ),
@@ -134,20 +153,44 @@ class NewNoteCreate extends HookConsumerWidget {
   }
 }
 
-final todolistProvider = StateNotifierProvider<TodoListNotifier, List<String>>((ref) => TodoListNotifier(),);
+class FilterType {
+  final String decoration;
+  bool isCompleted;
 
-class TodoListNotifier extends StateNotifier<List<String>>{
+  FilterType({required this.decoration, this.isCompleted = false});
+}
+
+final todolistProvider = StateNotifierProvider<TodoListNotifier, List<FilterType>>((ref) => TodoListNotifier(),);
+
+class TodoListNotifier extends StateNotifier<List<FilterType>>{
   TodoListNotifier() : super([]);
 
   void add(String todo){
-    state = [...state, todo];
+    final add_item = FilterType(decoration: todo);
+    state = [...state, add_item];
   }
 
-  void remove(String todo){
+  void taskComplete(FilterType todo){
+    state = [
+      for(final item in state)
+        if(item == todo) item..isCompleted = true
+        else item,
+    ];
+  }
+
+  void remove(FilterType todo){
     state = [
       for(final item in state)
         if(item != todo) item,
     ];
+  }
+
+  List<FilterType> get completetask{
+    return state.where((todo) => todo.isCompleted).toList();
+  }
+
+  List<FilterType> get incompletedtask{
+    return state.where((todo) => !todo.isCompleted).toList();
   }
 }
 
