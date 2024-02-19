@@ -85,6 +85,16 @@ Widget incompleted_buildListView(todolist, WidgetRef ref){
       return Card(
         child: ListTile(
           title: Text(incompletedtask[index].decoration),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TaskEdit(task: incompletedtask[index].decoration)),//
+            ).then((value)
+              {
+                ref.read(todolistProvider.notifier).edit(incompletedtask[index], value);
+              }
+            );
+          },
           trailing: IconButton(
             onPressed: () {
               ref.read(todolistProvider.notifier).taskComplete(todolist[index]);
@@ -126,6 +136,41 @@ Widget completed_buildListView(todolist, WidgetRef ref){
   );
 }
 
+class TaskEdit extends HookConsumerWidget{
+
+  final String task;
+  const TaskEdit({super.key, required this.task});
+
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final TextEditingController _controller = useTextEditingController(text: task);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('編集する'),
+      ),
+      body: Column(
+        children: <Widget>[
+          TextField(
+            controller: _controller,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            decoration: const InputDecoration(
+              labelText: 'メモ',
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, _controller.text);
+            },
+            child: const Text('編集完了'),
+          ),
+        ],
+      )
+    );
+  }
+}
+
 class NewNoteCreate extends HookConsumerWidget {
   const NewNoteCreate({super.key});
 
@@ -160,7 +205,7 @@ class NewNoteCreate extends HookConsumerWidget {
 }
 
 class FilterType {
-  final String decoration;
+  String decoration;
   bool isCompleted;
 
   FilterType({required this.decoration, this.isCompleted = false});
@@ -188,6 +233,14 @@ class TodoListNotifier extends StateNotifier<List<FilterType>>{
     state = [
       for(final item in state)
         if(item != todo) item,
+    ];
+  }
+
+  void edit(FilterType todo, String newdecoration){
+    state = [
+      for(final item in state)
+        if(item == todo) item..decoration = newdecoration
+        else item,
     ];
   }
 
